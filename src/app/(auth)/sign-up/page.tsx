@@ -1,29 +1,64 @@
-import { Check } from "lucide-react"
+'use client'
+import { Check, Import, Leaf } from "lucide-react"
 import Background from "../../../../public/authBack.png"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { authClient } from "@/lib/auth-client"
+import { useState } from "react"
+import Link from "next/link"
+import { redirect } from "next/navigation"
+
 
 const SignUpPage = () => {
+    const [isSubmitting, setIsSubmitting] = useState(false)
+
+    const handleEmailSignUp=async(e:React.FormEvent<HTMLFormElement>)=>{
+        e.preventDefault()
+        setIsSubmitting(true)
+        const formData = new FormData(e.currentTarget)
+        const user =Object.fromEntries(formData.entries()) as {name:string, email:string,password:string}
+
+        console.log(user)
+
+        const{data,error} =await authClient.signUp.email({
+            ...user,
+        })
+        if(data){
+            console.log(data)
+            redirect('/')
+        }
+        if(error){
+            console.log(error)
+        }
+        
+    }
   return (
-    <main className="signup-screen grid min-h-dvh grid-cols-1 bg-white md:grid-cols-2">
+    <main className="signup-screen grid min-h-dvh grid-cols-1 bg-[#f7faf7] lg:grid-cols-[1.02fr_0.98fr]">
       <section
         aria-label="GreenLondon community"
-        className="relative flex min-h-[420px] flex-col justify-end bg-cover bg-center px-8 py-7 text-white md:min-h-dvh"
+        className="relative flex min-h-[340px] flex-col justify-between overflow-hidden bg-cover bg-center px-7 py-7 text-white sm:px-10 sm:py-9 lg:min-h-dvh lg:px-14 lg:py-12"
         style={{ backgroundImage: `url("${Background.src}")` }}
       >
-        <div className="max-w-lg">
-          <h1 className="text-4xl leading-[1.15] font-bold tracking-tight sm:text-[42px]">
+        <div className="absolute inset-0 bg-gradient-to-b from-[#09251c]/45 via-[#09251c]/10 to-[#09251c]/80" />
+        <Link href="/" className="relative z-10 flex w-fit items-center gap-2 text-sm font-semibold tracking-wide text-white">
+          <span className="flex size-9 items-center justify-center rounded-full bg-white/15 ring-1 ring-white/25 backdrop-blur"><Leaf className="size-4" /></span>
+          GreenLondon
+        </Link>
+        <div className="relative z-10 max-w-lg pt-14 lg:pt-0">
+          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-[#b8edc8]">Grow something good</p>
+          <h1 className="text-4xl leading-[1.08] font-bold tracking-tight sm:text-5xl lg:text-[56px]">
             A greener city <span className="text-[#8bd5a6]">starts with us.</span>
           </h1>
-          <ul className="mt-4 space-y-1.5 text-sm font-medium">
+          <p className="mt-4 max-w-md text-sm leading-6 text-white/80 sm:text-base">Meet your neighbours, join local projects, and make a visible difference where you live.</p>
+          <ul className="mt-6 grid gap-3 text-sm font-medium sm:grid-cols-2">
             {[
-              "Join events in two taps",
-              "Track your volunteer hours",
-              "Create your own initiative",
+              "Find local events",
+              "Track volunteer hours",
+              "Start an initiative",
             ].map((benefit) => (
-              <li key={benefit} className="flex items-center gap-2">
-                <span className="flex size-[18px] shrink-0 items-center justify-center rounded-full bg-[#39b979]">
+              <li key={benefit} className="flex items-center gap-2 text-white/90">
+                <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-[#39b979] text-[#10291c]">
                   <Check aria-hidden="true" className="size-3 stroke-[3]" />
                 </span>
                 {benefit}
@@ -33,106 +68,80 @@ const SignUpPage = () => {
         </div>
       </section>
 
-      <section className="flex items-center justify-center px-6 py-10 sm:px-10 md:px-8 lg:px-11">
-        <div className="w-full max-w-[448px]">
-          <div className="mb-6 flex gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              className="h-[34px] rounded-full border-[#d9e9de] px-4 text-xs font-medium text-[#1d3027]"
-            >
-              Login
-            </Button>
-            <Button
-              type="button"
-              className="h-[34px] rounded-full bg-[#39b979] px-4 text-xs font-medium text-[#10291c] hover:bg-[#31a96d]"
-            >
-              Join the Community
-            </Button>
+      <section className="flex items-center justify-center px-6 py-10 sm:px-10 lg:px-12 lg:py-14">
+        <div className="w-full max-w-[420px]">
+          <div className="mb-8">
+            <Link href="/" className="flex w-fit items-center gap-2 text-sm font-bold text-[#1d3027] lg:hidden"><Leaf className="size-4 text-[#31a96d]" />GreenLondon</Link>
+          </div>
+          <div className="mb-7">
+            <span className="inline-flex rounded-full bg-[#e7f5eb] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#237548]">Join the community</span>
+            <h2 className="mt-4 text-3xl leading-tight font-bold tracking-[-0.04em] text-[#17271f] sm:text-[38px]">
+              Your next good thing starts here.
+            </h2>
+            <p className="mt-2 text-sm leading-6 text-[#6b7b72]">
+              Create an account to join local events and build greener neighbourhoods.
+            </p>
           </div>
 
-          <h2 className="text-[34px] leading-tight font-bold tracking-[-0.04em] text-[#17271f] sm:text-[36px]">
-            Join your neighbours.
-          </h2>
-          <p className="mt-1 text-[13px] text-[#6b7b72]">
-            Create a free account to join and create initiatives.
-          </p>
+          <div className="mb-5 flex items-center gap-4 text-xs font-medium text-[#89958e]">
+            <span className="h-px flex-1 bg-[#e2eae4]" />
+            Sign up with email
+            <span className="h-px flex-1 bg-[#e2eae4]" />
+          </div>
 
-          <Button
-            type="button"
-            variant="outline"
-            className="mt-7 h-[42px] w-full rounded-full border-[#d9e9de] bg-white text-xs font-semibold text-[#1d3027] hover:bg-[#f8fbf9]"
-          >
-            <span aria-hidden="true" className="mr-1 text-sm font-bold">
-              G
-            </span>
-            Continue with Google
-          </Button>
-
-          <div className="mt-4 space-y-[14px]">
-            <div className="space-y-1.5">
-              <Label htmlFor="full-name" className="text-xs font-semibold text-[#1d3027]">
+          <form onSubmit={handleEmailSignUp} className="space-y-5">
+            <div className="space-y-2">
+              <Label htmlFor="full-name" className="text-sm font-semibold text-[#1d3027]">
                 Full name
               </Label>
               <Input
                 id="full-name"
+                name="name"
                 placeholder="Your name"
-                className="h-[42px] rounded-xl border-[#d9e9de] px-3 text-xs shadow-none placeholder:text-[#929992]"
+                autoComplete="name"
+                required
+                className="h-12 rounded-xl border-[#d5e2d8] bg-white px-4 text-sm shadow-sm shadow-[#153d2410] placeholder:text-[#929992] focus-visible:border-[#39b979] focus-visible:ring-[#39b979]/20"
               />
             </div>
 
-            <div className="space-y-1.5">
-              <Label htmlFor="email" className="text-xs font-semibold text-[#1d3027]">
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-sm font-semibold text-[#1d3027]">
                 Email
               </Label>
               <Input
                 id="email"
                 type="email"
+                name="email"
                 placeholder="you@example.com"
-                className="h-[42px] rounded-xl border-[#d9e9de] px-3 text-xs shadow-none placeholder:text-[#929992]"
+                autoComplete="email"
+                required
+                className="h-12 rounded-xl border-[#d5e2d8] bg-white px-4 text-sm shadow-sm shadow-[#153d2410] placeholder:text-[#929992] focus-visible:border-[#39b979] focus-visible:ring-[#39b979]/20"
               />
             </div>
 
-            <div className="space-y-1.5">
-              <Label htmlFor="borough" className="text-xs font-semibold text-[#1d3027]">
-                Home borough
-              </Label>
-              <div className="relative">
-                <Input
-                  id="borough"
-                  value="Hackney"
-                  readOnly
-                  className="h-[42px] rounded-xl border-[#d9e9de] px-3 pr-9 text-xs text-[#26362d] shadow-none"
-                />
-                <svg
-                  aria-hidden="true"
-                  viewBox="0 0 16 16"
-                  className="pointer-events-none absolute top-1/2 right-3 size-3 -translate-y-1/2 fill-none stroke-[#25352d] stroke-1.5"
-                >
-                  <path d="m4 6 4 4 4-4" />
-                </svg>
-              </div>
-            </div>
-
-            <div className="space-y-1.5">
-              <Label htmlFor="password" className="text-xs font-semibold text-[#1d3027]">
+            <div className="space-y-2">
+              <Label htmlFor="password" className="text-sm font-semibold text-[#1d3027]">
                 Password
               </Label>
               <Input
                 id="password"
                 type="password"
+                name="password"
                 placeholder="At least 8 characters"
-                className="h-[42px] rounded-xl border-[#d9e9de] px-3 text-xs shadow-none placeholder:text-[#929992]"
+                autoComplete="new-password"
+                minLength={8}
+                required
+                className="h-12 rounded-xl border-[#d5e2d8] bg-white px-4 text-sm shadow-sm shadow-[#153d2410] placeholder:text-[#929992] focus-visible:border-[#39b979] focus-visible:ring-[#39b979]/20"
               />
             </div>
-          </div>
-
-          <Button
-            type="button"
-            className="mt-5 h-[40px] w-full rounded-full bg-[#39b979] text-xs font-semibold text-[#10291c] hover:bg-[#31a96d]"
-          >
-            Create account
-          </Button>
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+              className="mt-2 h-12 w-full rounded-xl bg-[#16834e] text-sm font-semibold text-white shadow-sm shadow-[#16834e]/20 hover:bg-[#126d41]"
+            >
+              {isSubmitting ? "Creating account…" : "Create account"}
+            </Button>
+          </form>
         </div>
       </section>
     </main>
