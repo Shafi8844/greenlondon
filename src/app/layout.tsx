@@ -24,10 +24,14 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={cn("h-full", "antialiased", manrope.className, "font-sans", geist.variable)}
     >
       <body className="min-h-full flex flex-col">
-        <Navbar></Navbar>
-        <hr className="mt-2 border-0.5 text-[#accbb3]"/>
+        <header data-site-chrome>
+          <Navbar></Navbar>
+          <hr className="mt-2 border-0.5 text-[#accbb3]"/>
+        </header>
         {children}
-        <Footer></Footer>
+        <div data-site-chrome>
+          <Footer></Footer>
+        </div>
       </body>
     </html>
   );

@@ -11,6 +11,10 @@
   padding-inline: 50px;
 }
 
+body:has(.signup-screen) [data-site-chrome] {
+  display: none;
+}
+
 @theme inline {
   --font-heading: var(--font-sans);
   --font-sans: var(--font-sans);
