@@ -142,7 +142,7 @@ const eventsCard = async () => {
                   {event.registeredCount} of {event.capacity} places taken
                 </span>
 
-                <Link href={`http://localhost:3000/discover/${event._id}`}>
+                <Link href={`/discover/${event._id}`}>
                 <button
                   type="button"
                   className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#2F8A57] transition-colors hover:text-[#1E6B41]"
