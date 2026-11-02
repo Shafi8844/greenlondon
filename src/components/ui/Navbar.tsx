@@ -26,8 +26,8 @@ const Navbar = () => {
             }
         </div>
         <div className="flex text-sm items-center gap-x-2">
-            <Link href={"/"}><button className="cursor-pointer text-sm font-bold hover:bg-[#e5f9ea] py-2 px-4 border-0.5 rounded-4xl">Login</button></Link>
-            <Link href={'/'}><button className="cursor-pointer text-sm font-bold bg-[#1B945E] py-3 px-5 rounded-4xl">Join the Community</button></Link>
+            <Link href={"/sign-In"}><button className="cursor-pointer text-sm font-bold hover:bg-[#e5f9ea] py-2 px-4 border-0.5 rounded-4xl">Login</button></Link>
+            <Link href={'/sign-up'}><button className="cursor-pointer text-sm font-bold bg-[#1B945E] py-3 px-5 rounded-4xl">Join the Community</button></Link>
         </div>
     </div>
   )
