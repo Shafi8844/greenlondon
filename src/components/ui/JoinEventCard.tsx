@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CheckCircle2, LogIn } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
+import { getAuthToken } from "@/lib/session-token";
 import type { VolunteerEvent } from "@/lib/eventData";
 import { eventLabel, formatDateParts } from "@/lib/eventData";
 
@@ -56,9 +57,19 @@ const JoinEventCard = ({ event }: JoinEventCardProps) => {
     setMessage("");
 
     try {
+      // The JWT proves who is joining — the backend trusts it, not the body
+      const token = await getAuthToken();
+      if (!token) {
+        setMessage("Your session expired — please sign in again.");
+        return;
+      }
+
       const res = await fetch(`${BASE_API}/reservation`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({
           // user data …
           userEmail: user.email,

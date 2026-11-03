@@ -4,6 +4,7 @@ import { useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import type { VolunteerEvent } from "@/lib/eventData";
 import { EVENT_TYPES } from "@/lib/eventData";
+import { getAuthToken } from "@/lib/session-token";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -80,20 +81,31 @@ const EventForm = ({ initial, creatorEmail, creatorName, onSaved, onCancel }: Ev
 
     setSubmitting(true);
     try {
+      // Identity is proven with the Better Auth JWT; the backend verifies
+      // it against the auth server's JWKS instead of trusting body fields.
+      const token = await getAuthToken();
+      if (!token) {
+        throw new Error("Your session expired — please sign in again.");
+      }
+      const headers = {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      };
+
       let res: Response;
 
       if (editing) {
         // Update own event only — backend verifies the creator email
         res = await fetch(`${BASE_API}/events/${initial!._id}`, {
           method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email: initial!.creatorEmail, ...data }),
+          headers,
+          body: JSON.stringify({ ...data }),
         });
       } else {
         // Create — keep the logged-in user's email with the event
         res = await fetch(`${BASE_API}/add_events`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers,
           body: JSON.stringify({
             ...data,
             email: creatorEmail,

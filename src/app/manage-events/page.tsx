@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import EventCard from "@/components/ui/eventCard";
 import EventForm from "@/components/ui/EventForm";
 import { authClient } from "@/lib/auth-client";
+import { getAuthToken } from "@/lib/session-token";
 import type { VolunteerEvent } from "@/lib/eventData";
 
 const BASE_API = "http://localhost:5050";
@@ -20,15 +21,19 @@ const ManageEventsPage = () => {
   const [editing, setEditing] = useState<VolunteerEvent | null>(null); // event open in the update form
   const [notice, setNotice] = useState("");
 
-  // Only this user's events — the backend filters on creatorEmail
+  // Only this user's events — the backend filters on the JWT bearer email
   useEffect(() => {
     if (!user?.email) return;
 
     let cancelled = false;
 
-    fetch(
-      `${BASE_API}/events?creatorEmail=${encodeURIComponent(user.email)}`,
-    )
+    getAuthToken()
+      .then((token) =>
+        fetch(
+          `${BASE_API}/events?creatorEmail=${encodeURIComponent(user.email)}`,
+          { headers: token ? { Authorization: `Bearer ${token}` } : undefined },
+        ),
+      )
       .then((res) => {
         if (!res.ok) throw new Error("Request failed");
         return res.json();
@@ -56,10 +61,16 @@ const ManageEventsPage = () => {
 
     setNotice("");
 
-    const res = await fetch(
-      `${BASE_API}/events/${event._id}?email=${encodeURIComponent(user.email)}`,
-      { method: "DELETE" },
-    );
+    const token = await getAuthToken();
+    if (!token) {
+      setNotice("Your session expired — please sign in again.");
+      return;
+    }
+
+    const res = await fetch(`${BASE_API}/events/${event._id}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
+    });
 
     if (res.ok) {
       setEvents((list) => list!.filter((item) => item._id !== event._id));

@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import EventCard from "@/components/ui/eventCard";
 import { authClient } from "@/lib/auth-client";
+import { getAuthToken } from "@/lib/session-token";
 import type { JoinedEvent } from "@/lib/eventData";
 
 const BASE_API = "http://localhost:5050";
@@ -21,8 +22,14 @@ const JoinedEventsPage = () => {
 
     let cancelled = false;
 
-    // Backend filters by the user's email and sorts by event date ascending
-    fetch(`${BASE_API}/reservation?email=${encodeURIComponent(user.email)}`)
+    // Backend filters by the JWT's bearer email (falls back to ?email=)
+    // and sorts by event date ascending
+    getAuthToken()
+      .then((token) =>
+        fetch(`${BASE_API}/reservation?email=${encodeURIComponent(user.email)}`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        }),
+      )
       .then((res) => {
         if (!res.ok) throw new Error("Request failed");
         return res.json();
