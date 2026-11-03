@@ -1,5 +1,5 @@
 'use client'
-import { Check, Import, Leaf } from "lucide-react"
+import { Check, Leaf } from "lucide-react"
 import Background from "../../../../public/authBack.png"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
