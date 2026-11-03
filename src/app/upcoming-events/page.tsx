@@ -1,4 +1,4 @@
-import EventList from "@/components/ui/EventList";
+import UpcomingEventsList from "@/components/ui/UpcomingEventsList";
 import { Badge } from "@/components/ui/badge";
 
 const UpcomingEventsPage = () => {
@@ -21,10 +21,9 @@ const UpcomingEventsPage = () => {
         soonest first.
       </p>
 
-      {/* Server filters to future dates with $gte, sorted by event date */}
-      <div className="mt-8">
-        <EventList url="http://localhost:5050/events?upcoming=1" showCount />
-      </div>
+      {/* Server filters to future dates with $gte; the list below adds
+          client-side search / type / date-range / sort controls */}
+      <UpcomingEventsList />
     </main>
   );
 };
