@@ -20,6 +20,14 @@ export const auth = betterAuth({
             clientSecret:process.env.GOOGLE_SECRET as string
         }
     },
+    // Allow Google sign-in to attach to an existing account created with
+    // email/password when the emails match — otherwise Better Auth refuses
+    // with "User already exist but account isn't linked to google".
+    account:{
+        accountLinking:{
+            trustedProviders:["google"]
+        }
+    },
     plugins:[jwt()],
     session:{
         cookieCache:{

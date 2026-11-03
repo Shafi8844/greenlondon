@@ -12,9 +12,12 @@ import { redirect } from "next/navigation"
 
 const SignUpPage = () => {
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false)
+    const [authError, setAuthError] = useState<string | null>(null)
 
     const handleEmailSignUp=async(e:React.FormEvent<HTMLFormElement>)=>{
         e.preventDefault()
+        setAuthError(null)
         setIsSubmitting(true)
         const formData = new FormData(e.currentTarget)
         const user =Object.fromEntries(formData.entries()) as {name:string, email:string,password:string}
@@ -32,6 +35,18 @@ const SignUpPage = () => {
             console.log(error)
         }
         
+    }
+    const handleGoogleSignUp=async()=>{
+      setAuthError(null)
+      setIsGoogleSubmitting(true)
+      const { error } = await authClient.signIn.social({
+        provider: "google",
+        callbackURL: "/",
+      })
+      if (error) {
+        setAuthError(error.message ?? "Unable to sign up with Google. Please try again.")
+        setIsGoogleSubmitting(false)
+      }
     }
   return (
     <main className="signup-screen grid min-h-dvh grid-cols-1 bg-[#f7faf7] lg:grid-cols-[1.02fr_0.98fr]">
@@ -141,6 +156,15 @@ const SignUpPage = () => {
             >
               {isSubmitting ? "Creating account…" : "Create account"}
             </Button>
+            <Button
+              type="button"
+              onClick={handleGoogleSignUp}
+              disabled={isGoogleSubmitting}
+              className="mt-2 h-12 w-full rounded-xl bg-[#16834e] text-sm font-semibold text-white shadow-sm shadow-[#16834e]/20 hover:bg-[#126d41]"
+            >
+              {isGoogleSubmitting ? "Connecting to Google…" : "Continue with Google"}
+            </Button>
+            {authError && <p role="alert" className="text-sm text-red-600">{authError}</p>}
           </form>
         </div>
       </section>
