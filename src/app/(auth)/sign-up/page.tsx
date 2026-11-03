@@ -4,47 +4,88 @@ import Background from "../../../../public/authBack.png"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { AuthToast } from "@/components/ui/auth-toast"
 import { authClient } from "@/lib/auth-client"
-import { useState } from "react"
+import { getPasswordValidationError } from "@/lib/auth-validation"
+import { useEffect, useState } from "react"
 import Link from "next/link"
-import { redirect } from "next/navigation"
+import { useRouter } from "next/navigation"
 
 
 const SignUpPage = () => {
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false)
     const [authError, setAuthError] = useState<string | null>(null)
+    const [successMessage, setSuccessMessage] = useState<string | null>(null)
+    const router = useRouter()
+
+    useEffect(() => {
+        if (new URLSearchParams(window.location.search).get("googleAuth") !== "success") {
+            return
+        }
+        let redirectTimeout: number | undefined
+        const toastTimeout = window.setTimeout(() => {
+            setSuccessMessage("Your account was created successfully.")
+            redirectTimeout = window.setTimeout(() => router.replace("/"), 1500)
+        }, 0)
+        return () => {
+            window.clearTimeout(toastTimeout)
+            window.clearTimeout(redirectTimeout)
+        }
+    }, [router])
 
     const handleEmailSignUp=async(e:React.FormEvent<HTMLFormElement>)=>{
         e.preventDefault()
         setAuthError(null)
+        const form = e.currentTarget
+        const formData = new FormData(form)
+        const password = String(formData.get("password") ?? "")
+        const passwordError = getPasswordValidationError(password)
+        if (passwordError) {
+            setAuthError(passwordError)
+            return
+        }
+
         setIsSubmitting(true)
-        const formData = new FormData(e.currentTarget)
-        const user =Object.fromEntries(formData.entries()) as {name:string, email:string,password:string}
+        const image = String(formData.get("image") ?? "").trim()
 
-        console.log(user)
-
-        const{data,error} =await authClient.signUp.email({
-            ...user,
-        })
-        if(data){
-            console.log(data)
-            redirect('/')
+        try {
+            const { data, error } = await authClient.signUp.email({
+                name: String(formData.get("name") ?? ""),
+                email: String(formData.get("email") ?? ""),
+                password,
+                ...(image ? { image } : {}),
+            })
+            if (error) {
+                setAuthError(error.message ?? "Unable to create your account. Please try again.")
+                return
+            }
+            if (!data) {
+                setAuthError("Unable to create your account. Please try again.")
+                return
+            }
+            setSuccessMessage("Your account was created successfully.")
+            window.setTimeout(() => router.replace("/"), 1500)
+        } catch {
+            setAuthError("Unable to create your account. Please try again.")
+        } finally {
+            setIsSubmitting(false)
         }
-        if(error){
-            console.log(error)
-        }
-        
     }
     const handleGoogleSignUp=async()=>{
       setAuthError(null)
       setIsGoogleSubmitting(true)
-      const { error } = await authClient.signIn.social({
-        provider: "google",
-        callbackURL: "/",
-      })
-      if (error) {
-        setAuthError(error.message ?? "Unable to sign up with Google. Please try again.")
+      try {
+        const { error } = await authClient.signIn.social({
+          provider: "google",
+          callbackURL: "/sign-up?googleAuth=success",
+        })
+        if (error) {
+          setAuthError(error.message ?? "Unable to sign up with Google. Please try again.")
+          setIsGoogleSubmitting(false)
+        }
+      } catch {
+        setAuthError("Unable to sign up with Google. Please try again.")
         setIsGoogleSubmitting(false)
       }
     }
@@ -135,6 +176,20 @@ const SignUpPage = () => {
             </div>
 
             <div className="space-y-2">
+              <Label htmlFor="image" className="text-sm font-semibold text-[#1d3027]">
+                Profile image URL <span className="font-normal text-[#89958e]">(optional)</span>
+              </Label>
+              <Input
+                id="image"
+                type="url"
+                name="image"
+                placeholder="https://example.com/your-photo.jpg"
+                autoComplete="url"
+                className="h-12 rounded-xl border-[#d5e2d8] bg-white px-4 text-sm shadow-sm shadow-[#153d2410] placeholder:text-[#929992] focus-visible:border-[#39b979] focus-visible:ring-[#39b979]/20"
+              />
+            </div>
+
+            <div className="space-y-2">
               <Label htmlFor="password" className="text-sm font-semibold text-[#1d3027]">
                 Password
               </Label>
@@ -142,9 +197,8 @@ const SignUpPage = () => {
                 id="password"
                 type="password"
                 name="password"
-                placeholder="At least 8 characters"
+                placeholder="At least 6 characters, with uppercase and lowercase letters"
                 autoComplete="new-password"
-                minLength={8}
                 required
                 className="h-12 rounded-xl border-[#d5e2d8] bg-white px-4 text-sm shadow-sm shadow-[#153d2410] placeholder:text-[#929992] focus-visible:border-[#39b979] focus-visible:ring-[#39b979]/20"
               />
@@ -168,6 +222,7 @@ const SignUpPage = () => {
           </form>
         </div>
       </section>
+      {successMessage && <AuthToast message={successMessage} />}
     </main>
   )
 }

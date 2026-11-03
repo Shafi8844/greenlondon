@@ -4,44 +4,84 @@ import Background from "../../../../public/authBack.png"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { AuthToast } from "@/components/ui/auth-toast"
 import { authClient } from "@/lib/auth-client"
+import { getPasswordValidationError } from "@/lib/auth-validation"
 import Link from "next/link"
-import { redirect } from "next/navigation"
-import { useState } from "react"
+import { useRouter } from "next/navigation"
+import { useEffect, useState } from "react"
 
 
 const SignInPgae = () => {
     const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false)
     const [authError, setAuthError] = useState<string | null>(null)
+    const [isSubmitting, setIsSubmitting] = useState(false)
+    const [successMessage, setSuccessMessage] = useState<string | null>(null)
+    const router = useRouter()
+
+    useEffect(() => {
+        if (new URLSearchParams(window.location.search).get("googleAuth") !== "success") {
+            return
+        }
+        let redirectTimeout: number | undefined
+        const toastTimeout = window.setTimeout(() => {
+            setSuccessMessage("You signed in successfully.")
+            redirectTimeout = window.setTimeout(() => router.replace("/"), 1500)
+        }, 0)
+        return () => {
+            window.clearTimeout(toastTimeout)
+            window.clearTimeout(redirectTimeout)
+        }
+    }, [router])
 
     const handleEmailSignUp=async(e:React.FormEvent<HTMLFormElement>)=>{
         e.preventDefault()
         setAuthError(null)
-        const formData = new FormData(e.currentTarget)
-        const user =Object.fromEntries(formData.entries()) as {name:string, email:string,password:string}
-
-        console.log(user)
-
-        const{data,error} =await authClient.signIn.email({
-            ...user,
-        })
-        if(data){
-            console.log(data)
-            redirect('/')
+        const form = e.currentTarget
+        const formData = new FormData(form)
+        const password = String(formData.get("password") ?? "")
+        const passwordError = getPasswordValidationError(password)
+        if (passwordError) {
+            setAuthError(passwordError)
+            return
         }
-        if(error){
-            console.log(error)
+
+        setIsSubmitting(true)
+        try {
+            const { data, error } = await authClient.signIn.email({
+                email: String(formData.get("email") ?? ""),
+                password,
+            })
+            if (error) {
+                setAuthError(error.message ?? "Unable to sign in. Please check your credentials.")
+                return
+            }
+            if (!data) {
+                setAuthError("Unable to sign in. Please try again.")
+                return
+            }
+            setSuccessMessage("You signed in successfully.")
+            window.setTimeout(() => router.replace("/"), 1500)
+        } catch {
+            setAuthError("Unable to sign in. Please try again.")
+        } finally {
+            setIsSubmitting(false)
         }
     }
     const handleGoogleSignIn = async()=>{
         setAuthError(null)
         setIsGoogleSubmitting(true)
-        const { error } = await authClient.signIn.social({
-            provider: "google",
-            callbackURL: "/",
-        });
-        if (error) {
-            setAuthError(error.message ?? "Unable to sign in with Google. Please try again.")
+        try {
+            const { error } = await authClient.signIn.social({
+                provider: "google",
+                callbackURL: "/sign-In?googleAuth=success",
+            });
+            if (error) {
+                setAuthError(error.message ?? "Unable to sign in with Google. Please try again.")
+                setIsGoogleSubmitting(false)
+            }
+        } catch {
+            setAuthError("Unable to sign in with Google. Please try again.")
             setIsGoogleSubmitting(false)
         }
     }
@@ -125,18 +165,18 @@ const SignInPgae = () => {
                 id="password"
                 type="password"
                 name="password"
-                placeholder="At least 8 characters"
-                autoComplete="new-password"
-                minLength={8}
-                required
-                className="h-12 rounded-xl border-[#d5e2d8] bg-white px-4 text-sm shadow-sm shadow-[#153d2410] placeholder:text-[#929992] focus-visible:border-[#39b979] focus-visible:ring-[#39b979]/20"
+                  placeholder="At least 6 characters, with uppercase and lowercase letters"
+                  autoComplete="current-password"
+                  required
+                  className="h-12 rounded-xl border-[#d5e2d8] bg-white px-4 text-sm shadow-sm shadow-[#153d2410] placeholder:text-[#929992] focus-visible:border-[#39b979] focus-visible:ring-[#39b979]/20"
               />
-            </div>
-            <Button
-              type="submit"
+              </div>
+              <Button
+                type="submit"
+                disabled={isSubmitting}
               className="mt-2 h-12 w-full rounded-xl bg-[#16834e] text-sm font-semibold text-white shadow-sm shadow-[#16834e]/20 hover:bg-[#126d41]"
             >
-              Log In
+                {isSubmitting ? "Signing in…" : "Log In"}
             </Button>
             <Button
               type="button"
@@ -150,6 +190,7 @@ const SignInPgae = () => {
           </form>
         </div>
       </section>
+      {successMessage && <AuthToast message={successMessage} />}
     </main>
   )
 }

@@ -12,7 +12,8 @@ export const auth = betterAuth({
         client,
     }),
     emailAndPassword:{
-        enabled:true
+        enabled:true,
+        minPasswordLength:6,
     },
     socialProviders:{
         google:{
