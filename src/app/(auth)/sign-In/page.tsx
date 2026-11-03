@@ -122,6 +122,12 @@ const SignInPgae = () => {
             >
               Log In
             </Button>
+            <Button
+              type="submit"
+              className="mt-2 h-12 w-full rounded-xl bg-[#16834e] text-sm font-semibold text-white shadow-sm shadow-[#16834e]/20 hover:bg-[#126d41]"
+            >
+              Log In Google
+            </Button>
           </form>
         </div>
       </section>
