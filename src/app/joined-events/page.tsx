@@ -7,8 +7,7 @@ import EventCard from "@/components/ui/eventCard";
 import { authClient } from "@/lib/auth-client";
 import { getAuthToken } from "@/lib/session-token";
 import type { JoinedEvent } from "@/lib/eventData";
-
-const BASE_API = "http://localhost:5050";
+import { apiUrl } from "@/lib/api-url";
 
 const JoinedEventsPage = () => {
   const { data: session } = authClient.useSession();
@@ -26,7 +25,7 @@ const JoinedEventsPage = () => {
     // and sorts by event date ascending
     getAuthToken()
       .then((token) =>
-        fetch(`${BASE_API}/reservation?email=${encodeURIComponent(user.email)}`, {
+        fetch(apiUrl(`/reservation?email=${encodeURIComponent(user.email)}`), {
           headers: token ? { Authorization: `Bearer ${token}` } : undefined,
         }),
       )
@@ -66,7 +65,7 @@ const JoinedEventsPage = () => {
 
       {error ? (
         <p className="mt-8 rounded-2xl bg-[#F2FAF4] p-8 text-center text-[#6B7A70]">
-          Couldn&apos;t load your events — is the backend on port 5050 running?
+          Couldn&apos;t load your events — please check the events server configuration.
         </p>
       ) : joins === null ? (
         <div className="mt-8 grid grid-cols-1 gap-7 md:grid-cols-2 xl:grid-cols-3">

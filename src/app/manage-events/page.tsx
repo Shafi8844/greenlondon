@@ -8,9 +8,8 @@ import EventCard from "@/components/ui/eventCard";
 import EventForm from "@/components/ui/EventForm";
 import { authClient } from "@/lib/auth-client";
 import { getAuthToken } from "@/lib/session-token";
+import { apiUrl } from "@/lib/api-url";
 import type { VolunteerEvent } from "@/lib/eventData";
-
-const BASE_API = "http://localhost:5050";
 
 const ManageEventsPage = () => {
   const { data: session } = authClient.useSession();
@@ -30,7 +29,7 @@ const ManageEventsPage = () => {
     getAuthToken()
       .then((token) =>
         fetch(
-          `${BASE_API}/events?creatorEmail=${encodeURIComponent(user.email)}`,
+          apiUrl(`/events?creatorEmail=${encodeURIComponent(user.email)}`),
           { headers: token ? { Authorization: `Bearer ${token}` } : undefined },
         ),
       )
@@ -67,7 +66,7 @@ const ManageEventsPage = () => {
       return;
     }
 
-    const res = await fetch(`${BASE_API}/events/${event._id}`, {
+    const res = await fetch(apiUrl(`/events/${event._id}`), {
       method: "DELETE",
       headers: { Authorization: `Bearer ${token}` },
     });

@@ -4,6 +4,7 @@ import Image from "next/image";
 import JoinEventCard from "@/components/ui/JoinEventCard";
 import type { VolunteerEvent } from "@/lib/eventData";
 import { eventLabel, formatDateParts, imageSrc } from "@/lib/eventData";
+import { apiUrl } from "@/lib/api-url";
 
 interface IPageProps {
   params: Promise<{ id: string }>;
@@ -16,7 +17,7 @@ export const instant = false;
 const page = async ({ params }: IPageProps) => {
   const { id } = await params;
 
-  const res = await fetch(`http://localhost:5050/events/${id}`);
+  const res = await fetch(apiUrl(`/events/${id}`));
 
   if (!res.ok) {
     notFound();

@@ -3,6 +3,7 @@ import EventList from "@/components/ui/EventList";
 import FeaturesSection from "@/components/ui/featuresSection";
 import GallerySection from "@/components/ui/gallerySection";
 import NewsletterSection from "@/components/ui/newsletterSection";
+import { apiUrl } from "@/lib/api-url";
 
 export default function Home() {
   return (
@@ -27,7 +28,7 @@ export default function Home() {
             </p>
 
             <div className="mt-12 text-left">
-              <EventList url="http://localhost:5050/events/featured" />
+              <EventList url={apiUrl("/events/featured")} />
             </div>
           </div>
         </div>

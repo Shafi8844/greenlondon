@@ -6,10 +6,9 @@ import { useRouter } from "next/navigation";
 import { CheckCircle2, LogIn } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 import { getAuthToken } from "@/lib/session-token";
+import { apiUrl } from "@/lib/api-url";
 import type { VolunteerEvent } from "@/lib/eventData";
 import { eventLabel, formatDateParts } from "@/lib/eventData";
-
-const BASE_API = "http://localhost:5050";
 
 interface JoinEventCardProps {
   event: VolunteerEvent;
@@ -32,7 +31,7 @@ const JoinEventCard = ({ event }: JoinEventCardProps) => {
 
     let cancelled = false;
 
-    fetch(`${BASE_API}/reservation?email=${encodeURIComponent(user.email)}`)
+    fetch(apiUrl(`/reservation?email=${encodeURIComponent(user.email)}`))
       .then((res) => res.json())
       .then((joins: { eventId: string }[]) => {
         if (!cancelled && joins.some((join) => join.eventId === event._id)) {
@@ -64,7 +63,7 @@ const JoinEventCard = ({ event }: JoinEventCardProps) => {
         return;
       }
 
-      const res = await fetch(`${BASE_API}/reservation`, {
+      const res = await fetch(apiUrl("/reservation"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -103,7 +102,7 @@ const JoinEventCard = ({ event }: JoinEventCardProps) => {
       );
       setMessage("You're in! See you at the event 🌱");
     } catch {
-      setMessage("Could not reach the server — is it running on port 5050?");
+      setMessage("Could not reach the events server. Please try again later.");
     } finally {
       setJoining(false);
     }

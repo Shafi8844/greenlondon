@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import type { VolunteerEvent } from "@/lib/eventData";
 import { EVENT_TYPES } from "@/lib/eventData";
 import { getAuthToken } from "@/lib/session-token";
+import { apiUrl } from "@/lib/api-url";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -26,8 +27,6 @@ interface EventFormProps {
   onSaved?: (event: VolunteerEvent) => void;
   onCancel?: () => void;
 }
-
-const BASE_API = "http://localhost:5050";
 
 const EMPTY_SUBSCRIBE = () => () => {};
 
@@ -96,14 +95,14 @@ const EventForm = ({ initial, creatorEmail, creatorName, onSaved, onCancel }: Ev
 
       if (editing) {
         // Update own event only — backend verifies the creator email
-        res = await fetch(`${BASE_API}/events/${initial!._id}`, {
+        res = await fetch(apiUrl(`/events/${initial!._id}`), {
           method: "PATCH",
           headers,
           body: JSON.stringify({ ...data }),
         });
       } else {
         // Create — keep the logged-in user's email with the event
-        res = await fetch(`${BASE_API}/add_events`, {
+        res = await fetch(apiUrl("/add_events"), {
           method: "POST",
           headers,
           body: JSON.stringify({

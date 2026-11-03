@@ -5,8 +5,7 @@ import { Search, SlidersHorizontal, X } from "lucide-react";
 import EventCard from "@/components/ui/eventCard";
 import type { VolunteerEvent } from "@/lib/eventData";
 import { EVENT_TYPES, eventLabel } from "@/lib/eventData";
-
-const BASE_API = "http://localhost:5050";
+import { apiUrl } from "@/lib/api-url";
 
 const localRangeEnd = () => {
   const now = new Date();
@@ -54,7 +53,7 @@ const UpcomingEventsList = () => {
   useEffect(() => {
     let cancelled = false;
 
-    fetch(`${BASE_API}/events?upcoming=1`)
+    fetch(apiUrl("/events?upcoming=1"))
       .then((res) => {
         if (!res.ok) throw new Error("Request failed");
         return res.json();
