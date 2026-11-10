@@ -31,7 +31,12 @@ const JoinEventCard = ({ event }: JoinEventCardProps) => {
 
     let cancelled = false;
 
-    fetch(apiUrl(`/reservation?email=${encodeURIComponent(user.email)}`))
+    getAuthToken()
+      .then((token) =>
+        fetch(apiUrl(`/reservation?email=${encodeURIComponent(user.email)}`), {
+          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        }),
+      )
       .then((res) => res.json())
       .then((joins: { eventId: string }[]) => {
         if (!cancelled && joins.some((join) => join.eventId === event._id)) {
